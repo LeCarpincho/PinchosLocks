@@ -40,8 +40,9 @@ general:
 
   # ─── Debug Mode ─────────────────────────────────────────────────────────────
   # Enable detailed logging for troubleshooting
+  # Creates a debug.log file in plugin folder with detailed access checks
   # WARNING: This will spam your console! Only enable when needed
-  debug: false
+  debug: true
 
   # ─── Auto-Save ──────────────────────────────────────────────────────────────
   # Interval in minutes to auto-save lock data (0 = disabled)
@@ -111,29 +112,6 @@ tiers:
     custom-model-data: 1003
     pick-difficulty: 85
     pickable: true
-
-
-# ┌──────────────────────────────────────────────────────────────────────────────┐
-# │                            KEY CONFIGURATION                                  │
-# │                                                                               │
-# │  Keys allow trusted access without needing lockpicks                          │
-# └──────────────────────────────────────────────────────────────────────────────┘
-
-keys:
-
-  # ─── Key Materials ──────────────────────────────────────────────────────────
-  # Base material for regular keys
-  base-material: "TRIAL_KEY"
-
-  # Material for master keys (if implemented)
-  master-material: "OMINOUS_TRIAL_KEY"
-
-  # ─── Key Limits ─────────────────────────────────────────────────────────────
-  # Allow players to create duplicate keys
-  allow-duplicates: true
-
-  # Maximum keys that can exist for a single lock
-  max-keys-per-lock: 5
 
 
 # ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -346,9 +324,6 @@ cooldowns:
   # Time between placing locks
   lock-placement: 1.0
 
-  # Time between using keys
-  key-use: 0.5
-
   # Time between lockpick attempts (overridden by lockpick tier settings)
   lockpick-attempt: 3.0
 
@@ -368,9 +343,6 @@ sounds:
   lock-remove: "BLOCK_IRON_DOOR_OPEN"
   lock-success: "BLOCK_CHEST_OPEN"
   lock-denied: "BLOCK_IRON_DOOR_CLOSE"
-
-  # ─── Key Sounds ─────────────────────────────────────────────────────────────
-  key-use: "BLOCK_IRON_TRAPDOOR_OPEN"
 
   # ─── Lockpick Sounds ────────────────────────────────────────────────────────
   lockpick-success: "ENTITY_PLAYER_LEVELUP"

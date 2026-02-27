@@ -6,9 +6,10 @@ import dev.pincho.locks.config.ConfigManager
 import dev.pincho.locks.data.LockStorage
 import dev.pincho.locks.listeners.LockInteractionListener
 import dev.pincho.locks.listeners.LockProtectionListener
-import dev.pincho.locks.managers.KeyManager
 import dev.pincho.locks.managers.LockManager
 import dev.pincho.locks.managers.LockpickManager
+import dev.pincho.locks.security.IntegrityChecker
+import dev.pincho.locks.utils.LockLogger
 import dev.pincho.locks.utils.MessageUtils
 import kotlinx.coroutines.*
 import org.bukkit.NamespacedKey
@@ -25,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin
  * - Uses Clean Architecture with separated layers
  * - Implements coroutines for async operations
  * - Thread-safe data storage with proper synchronization
+ * - Code integrity checking for protection
  *
  * @author MrSingu
  * @version 1.0.0
@@ -40,33 +42,47 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
 
     override val coroutineContext = supervisorJob + Dispatchers.Default + exceptionHandler
 
+    // Security components
+    private lateinit var integrityChecker: IntegrityChecker
+
     // Managers and services
     private lateinit var configManager: ConfigManager
     private lateinit var messageUtils: MessageUtils
     private lateinit var lockStorage: LockStorage
     private lateinit var lockManager: LockManager
-    private lateinit var keyManager: KeyManager
     private lateinit var lockpickManager: LockpickManager
+    private lateinit var lockLogger: LockLogger
 
     // Auto-save task
     private var autoSaveJob: Job? = null
 
+    // Cleanup task for expired cooldowns
+    private var cleanupJob: Job? = null
+
+    // Security validation job
+    private var securityJob: Job? = null
+
     override fun onEnable() {
+        // Phase 1: Security initialization (integrity check)
+        initializeSecurity()
+
         // Initialize configuration
         configManager = ConfigManager(this)
         configManager.load()
 
+        // Initialize logger
+        lockLogger = LockLogger(this, configManager)
+
         // Initialize message system with Adventure support
         messageUtils = MessageUtils(this)
-        messageUtils.initialize() // Initialize BukkitAudiences for cross-platform support
+        messageUtils.initialize()
         messageUtils.loadLanguage(configManager.language)
 
         // Initialize storage with coroutine scope
         lockStorage = LockStorage(this, this)
 
         // Initialize managers
-        lockManager = LockManager(this, lockStorage, configManager, messageUtils, this)
-        keyManager = KeyManager(this, lockStorage, configManager, messageUtils)
+        lockManager = LockManager(this, lockStorage, configManager, messageUtils)
         lockpickManager = LockpickManager(this, configManager, messageUtils, lockManager)
 
         // Load stored data
@@ -85,26 +101,73 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
         // Start auto-save if enabled
         startAutoSave()
 
+        // Start periodic cleanup
+        startCleanupTask()
+
+        // Start security validation task
+        startSecurityValidation()
+
         // Print startup banner
         printBanner()
     }
 
+    /**
+     * Initializes security components (integrity checking only).
+     */
+    private fun initializeSecurity() {
+        try {
+            integrityChecker = IntegrityChecker(this)
+            val integrityStatus = integrityChecker.performCheck()
+
+            when (integrityStatus) {
+                IntegrityChecker.IntegrityStatus.DEBUGGER_DETECTED -> {
+                    logger.warning("Debugger detected.")
+                }
+                IntegrityChecker.IntegrityStatus.JAR_MODIFIED,
+                IntegrityChecker.IntegrityStatus.CLASS_TAMPERED -> {
+                    logger.severe("Plugin integrity check failed. The plugin may have been modified.")
+                }
+                IntegrityChecker.IntegrityStatus.SUSPICIOUS_ENVIRONMENT -> {
+                    logger.warning("Running in suspicious environment.")
+                }
+                else -> {
+                    // Integrity OK
+                }
+            }
+        } catch (e: Exception) {
+            logger.warning("Security initialization error: ${e.message}")
+        }
+    }
+
     override fun onDisable() {
-        // Cancel auto-save
+        // Cancel auto-save and cleanup
         autoSaveJob?.cancel()
+        cleanupJob?.cancel()
+        securityJob?.cancel()
+
+        // Shutdown lockpick manager to cancel all sessions and timers
+        if (::lockpickManager.isInitialized) {
+            lockpickManager.shutdown()
+        }
 
         // Close Adventure audiences
-        messageUtils.close()
+        if (::messageUtils.isInitialized) {
+            messageUtils.close()
+        }
 
-        // Save all data synchronously on disable
-        runBlocking {
-            lockStorage.save().onFailure { e ->
-                logger.severe("Failed to save lock data on disable: ${e.message}")
+        // Force save all data synchronously on disable (bypass debounce)
+        if (::lockStorage.isInitialized) {
+            runBlocking {
+                lockStorage.forceSave().onFailure { e ->
+                    logger.severe("Failed to save lock data on disable: ${e.message}")
+                }
             }
         }
 
-        // Cancel all coroutines
-        supervisorJob.cancel()
+        // Cancel all coroutines and wait for completion
+        runBlocking {
+            supervisorJob.cancelAndJoin()
+        }
 
         // Print shutdown message
         printShutdownMessage()
@@ -117,7 +180,7 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
         val pluginManager = server.pluginManager
 
         pluginManager.registerEvents(
-            LockInteractionListener(this, lockManager, keyManager, lockpickManager, configManager, messageUtils),
+            LockInteractionListener(this, lockManager, lockpickManager, configManager, messageUtils),
             this
         )
 
@@ -131,7 +194,6 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
             object : org.bukkit.event.Listener {
                 @org.bukkit.event.EventHandler
                 fun onPlayerQuit(event: org.bukkit.event.player.PlayerQuitEvent) {
-                    keyManager.clearCooldown(event.player.uniqueId)
                     lockpickManager.clearCooldown(event.player.uniqueId)
                     lockManager.clearTemporaryAccess(event.player.uniqueId)
                 }
@@ -147,7 +209,7 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
      * Registers all commands.
      */
     private fun registerCommands() {
-        val lockCommand = LockCommands(this, lockManager, keyManager, configManager, messageUtils)
+        val lockCommand = LockCommands(this, lockManager, configManager, messageUtils)
 
         getCommand("lock")?.let { command ->
             command.setExecutor(lockCommand)
@@ -177,13 +239,50 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
 
         autoSaveJob = launch {
             while (isActive) {
-                delay(interval * 60 * 1000L) // Convert minutes to milliseconds
+                delay(interval * 60 * 1000L)
                 lockStorage.save().onSuccess {
                     if (configManager.debug) {
                         logger.info("[Debug] Auto-save completed")
                     }
                 }.onFailure { e ->
                     logger.warning("Auto-save failed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    /**
+     * Starts the periodic cleanup task for expired cooldowns.
+     * Runs every 5 minutes to clean up memory.
+     */
+    private fun startCleanupTask() {
+        cleanupJob = launch {
+            while (isActive) {
+                delay(5 * 60 * 1000L)
+                lockpickManager.cleanupExpiredCooldowns()
+                if (configManager.debug) {
+                    logger.info("[Debug] Cleanup task completed")
+                }
+            }
+        }
+    }
+
+    /**
+     * Starts periodic security validation.
+     * Runs every 30 minutes to verify integrity.
+     */
+    private fun startSecurityValidation() {
+        securityJob = launch {
+            while (isActive) {
+                delay(30 * 60 * 1000L)
+
+                // Perform quick integrity check
+                if (::integrityChecker.isInitialized) {
+                    integrityChecker.quickCheck()
+                }
+
+                if (configManager.debug) {
+                    logger.info("[Debug] Security validation completed")
                 }
             }
         }
@@ -198,7 +297,9 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
 
         // Restart auto-save with new interval
         autoSaveJob?.cancel()
+        cleanupJob?.cancel()
         startAutoSave()
+        startCleanupTask()
 
         logger.info("Configuration reloaded")
     }
@@ -209,10 +310,10 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
     private fun printShutdownMessage() {
         val message = """
             |
-            |§6╔═══════════════════════════════════════════════════════════╗
-            |§6║  §cPincho's Lock's §f- §eDisabled                       §6║
-            |§6║  §fData saved successfully. §aSee you later! §e(ᵔᴥᵔ)    §6║
-            |§6╚═══════════════════════════════════════════════════════════╝
+            |${"\u00A7"}6=================================================
+            |${"\u00A7"}6|  ${"\u00A7"}cPincho's Lock's ${"\u00A7"}f- ${"\u00A7"}eDisabled                 ${"\u00A7"}6|
+            |${"\u00A7"}6|  ${"\u00A7"}fData saved successfully. ${"\u00A7"}aSee you later!     ${"\u00A7"}6|
+            |${"\u00A7"}6=================================================
             |
         """.trimMargin()
 
@@ -231,25 +332,25 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
 
         val banner = """
             |
-            |§e  ⠀⠀⢀⣀⠤⠿⢤⢖⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-            |§e  ⡔⢩⠂⠀⠒⠗⠈⠀⠉⠢⠄⣀⠠⠤⠄⠒⢖⡒⢒⠂⠤⢄⠀⠀⠀⠀
-            |§e  ⠇⠤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠈⠀⠈⠈⡨⢀⠡⡪⠢⡀⠀
-            |§e  ⠈⠒⠀⠤⠤⣄⡆⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠢⠀⢕⠱⠀
-            |§e  ⠀⠀⠀⠀⠀⠈⢳⣐⡐⠐⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠁⠇
-            |§e  ⠀⠀⠀⠀⠀⠀⠀⠑⢤⢁⠀⠆⠀⠀⠀⠀⠀⢀⢰⠀⠀⠀⡀⢄⡜⠀
-            |§e  ⠀⠀⠀⠀⠀⠀⠀⠀⠘⡦⠄⡷⠢⠤⠤⠤⠤⢬⢈⡇⢠⣈⣰⠎⠀⠀
-            |§e  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⣃⢸⡇⠀⠀⠀⠀⠀⠈⢪⢀⣺⡅⢈⠆⠀⠀
-            |§e  ⠀⠀⠀⠀⠀⠀⠀⠶⡿⠤⠚⠁⠀⠀⠀⢀⣠⡤⢺⣥⠟⢡⠃⠀⠀⠀
-            |§e  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀
+            |${"\u00A7"}e  ⠀⠀⢀⣀⠤⠿⢤⢖⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+            |${"\u00A7"}e  ⡔⢩⠂⠀⠒⠗⠈⠀⠉⠢⠄⣀⠠⠤⠄⠒⢖⡒⢒⠂⠤⢄⠀⠀⠀⠀
+            |${"\u00A7"}e  ⠇⠤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠈⠀⠈⠈⡨⢀⠡⡪⠢⡀⠀
+            |${"\u00A7"}e  ⠈⠒⠀⠤⠤⣄⡆⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠢⠀⢕⠱⠀
+            |${"\u00A7"}e  ⠀⠀⠀⠀⠀⠈⢳⣐⡐⠐⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠁⠇
+            |${"\u00A7"}e  ⠀⠀⠀⠀⠀⠀⠀⠑⢤⢁⠀⠆⠀⠀⠀⠀⠀⢀⢰⠀⠀⠀⡀⢄⡜⠀
+            |${"\u00A7"}e  ⠀⠀⠀⠀⠀⠀⠀⠀⠘⡦⠄⡷⠢⠤⠤⠤⠤⢬⢈⡇⢠⣈⣰⠎⠀⠀
+            |${"\u00A7"}e  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⣃⢸⡇⠀⠀⠀⠀⠀⠈⢪⢀⣺⡅⢈⠆⠀⠀
+            |${"\u00A7"}e  ⠀⠀⠀⠀⠀⠀⠀⠶⡿⠤⠚⠁⠀⠀⠀⢀⣠⡤⢺⣥⠟⢡⠃⠀⠀⠀
+            |${"\u00A7"}e  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀
             |
-            |§6  ╔════════════════════════════════════════╗
-            |§6  ║  §b§lPINCHO'S LOCK'S                  §6║
-            |§6  ╠════════════════════════════════════════╣
-            |§6  ║  §a► §fVersion: §e$version                 §6║
-            |§6  ║  §a► §fDeveloper: §bMrSingu             §6║
-            |§6  ║  §a► §fLocks Loaded: §d$lockCount                §6║
-            |§6  ║  §a► §fStatus: §aEnabled!               §6║
-            |§6  ╚════════════════════════════════════════╝
+            |${"\u00A7"}6  ╔════════════════════════════════════════╗
+            |${"\u00A7"}6  ║  ${"\u00A7"}b${"\u00A7"}lPINCHO'S LOCK'S                  ${"\u00A7"}6║
+            |${"\u00A7"}6  ╠════════════════════════════════════════╣
+            |${"\u00A7"}6  ║  ${"\u00A7"}a► ${"\u00A7"}fVersion: ${"\u00A7"}e$version                     ${"\u00A7"}6║
+            |${"\u00A7"}6  ║  ${"\u00A7"}a► ${"\u00A7"}fDeveloper: ${"\u00A7"}bMrSingu                 ${"\u00A7"}6║
+            |${"\u00A7"}6  ║  ${"\u00A7"}a► ${"\u00A7"}fLocks Loaded: ${"\u00A7"}d$lockCount                    ${"\u00A7"}6║
+            |${"\u00A7"}6  ║  ${"\u00A7"}a► ${"\u00A7"}fStatus: ${"\u00A7"}aEnabled!                   ${"\u00A7"}6║
+            |${"\u00A7"}6  ╚════════════════════════════════════════╝
             |
         """.trimMargin()
 
@@ -273,11 +374,6 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
     fun getLockManager(): LockManager = lockManager
 
     /**
-     * Gets the key manager instance.
-     */
-    fun getKeyManager(): KeyManager = keyManager
-
-    /**
      * Gets the config manager instance.
      */
     fun getConfigManager(): ConfigManager = configManager
@@ -296,4 +392,14 @@ class PinchosLocks : JavaPlugin(), CoroutineScope {
      * Gets the lockpick manager instance.
      */
     fun getLockpickManager(): LockpickManager = lockpickManager
+
+    /**
+     * Gets the lock logger instance.
+     */
+    fun getLockLogger(): LockLogger = lockLogger
+
+    /**
+     * Gets the integrity checker instance.
+     */
+    fun getIntegrityChecker(): IntegrityChecker = integrityChecker
 }

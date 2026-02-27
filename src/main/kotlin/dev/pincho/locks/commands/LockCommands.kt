@@ -2,7 +2,6 @@ package dev.pincho.locks.commands
 
 import dev.pincho.locks.PinchosLocks
 import dev.pincho.locks.config.ConfigManager
-import dev.pincho.locks.managers.KeyManager
 import dev.pincho.locks.managers.LockManager
 import dev.pincho.locks.models.Lock
 import dev.pincho.locks.models.LockTier
@@ -23,7 +22,6 @@ import java.util.UUID
 class LockCommands(
     private val plugin: PinchosLocks,
     private val lockManager: LockManager,
-    private val keyManager: KeyManager,
     private val config: ConfigManager,
     private val messages: MessageUtils
 ) : CommandExecutor, TabCompleter {
@@ -50,7 +48,6 @@ class LockCommands(
             "trust" -> handleTrust(sender, args)
             "untrust" -> handleUntrust(sender, args)
             "trustlist" -> handleTrustList(sender)
-            "key" -> handleKey(sender)
             "reload" -> handleReload(sender)
             else -> showHelp(sender)
         }
@@ -68,7 +65,7 @@ class LockCommands(
 
         return when (args.size) {
             1 -> {
-                val subcommands = mutableListOf("help", "info", "remove", "trust", "untrust", "trustlist", "key")
+                val subcommands = mutableListOf("help", "info", "remove", "trust", "untrust", "trustlist")
                 if (sender.hasPermission("pinchoslocks.admin")) {
                     subcommands.addAll(listOf("give", "reload"))
                 }
@@ -111,7 +108,6 @@ class LockCommands(
         messages.sendRaw(sender, "help.trust")
         messages.sendRaw(sender, "help.untrust")
         messages.sendRaw(sender, "help.trustlist")
-        messages.sendRaw(sender, "help.key")
 
         if (sender.hasPermission("pinchoslocks.admin")) {
             messages.sendRaw(sender, "help.give")
@@ -419,52 +415,6 @@ class LockCommands(
             val uuid = UUID.fromString(uuidString)
             val name = Bukkit.getOfflinePlayer(uuid).name ?: "Unknown"
             messages.sendRaw(sender, "trust.list-entry", mapOf("player" to name))
-        }
-    }
-
-    /**
-     * Handles /lock key
-     */
-    private fun handleKey(sender: CommandSender) {
-        if (sender !is Player) {
-            messages.send(sender, "general.player-only")
-            return
-        }
-
-        if (!sender.hasPermission("pinchoslocks.use")) {
-            messages.send(sender, "general.no-permission")
-            return
-        }
-
-        val block = sender.getTargetBlockExact(5)
-        if (block == null) {
-            messages.send(sender, "lock.not-looking")
-            return
-        }
-
-        val lock = lockManager.getLock(block)
-        if (lock == null) {
-            messages.send(sender, "lock.not-locked")
-            return
-        }
-
-        if (!lock.isOwner(sender.uniqueId) && !sender.hasPermission("pinchoslocks.admin")) {
-            messages.send(sender, "lock.not-owner")
-            return
-        }
-
-        val result = keyManager.giveKey(sender, lock)
-
-        when (result) {
-            is KeyManager.KeyResult.Success -> {
-                messages.send(sender, "key.received")
-            }
-            is KeyManager.KeyResult.MaxKeysReached -> {
-                messages.send(sender, "key.max-keys")
-            }
-            else -> {
-                // Handle other cases if needed
-            }
         }
     }
 

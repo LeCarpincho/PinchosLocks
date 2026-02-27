@@ -152,26 +152,24 @@ class LockpickCommands(
      */
     fun createLockpickItem(tier: LockpickTier, amount: Int = 1): ItemStack {
         val tierConfig = config.getLockpickConfig(tier)
+        val tierKey = tier.name.lowercase()
 
-        val name = when (tier) {
-            LockpickTier.BASIC -> "<gray>Ganzua Basica</gray>"
-            LockpickTier.ADVANCED -> "<blue>Ganzua Avanzada</blue>"
-            LockpickTier.MASTER -> "<gold>Ganzua Maestra</gold>"
+        // Get translated name for this tier
+        val translatedName = messages.getRaw("items.lockpick.name.$tierKey")
+
+        // Get translated tier display name
+        val translatedTierName = messages.getRaw("items.tiers.lockpick.$tierKey")
+
+        // Get and process lore with placeholders
+        val lore = messages.getList("items.lockpick.lore").map { line ->
+            line.replace("{tier}", translatedTierName)
+                .replace("{uses}", tierConfig.durability.toString())
+                .replace("{bonus}", tierConfig.successModifier.toString())
         }
-
-        val lore = listOf(
-            "",
-            "<gray>Tier: <white>${tier.displayName}</white></gray>",
-            "<gray>Usos: <yellow>${tierConfig.durability}</yellow></gray>",
-            "<gray>Exito: <green>+${tierConfig.successModifier}%</green></gray>",
-            "",
-            "<dark_gray>Usa esto en un candado</dark_gray>",
-            "<dark_gray>para intentar abrirlo.</dark_gray>"
-        )
 
         return ItemBuilder.of(tierConfig.material)
             .amount(amount)
-            .name(name)
+            .name(translatedName)
             .loreStrings(lore)
             .customModelData(tier.defaultCustomModelData)
             .persistentString(plugin, "lockpick_tier", tier.name)
@@ -235,16 +233,20 @@ class LockpickCommands(
             newUses
         )
 
-        // Update lore with new uses
+        // Update lore with new uses using translations
         val tier = getLockpickTier(item) ?: return true
-        val lore = listOf(
-            "",
-            "<gray>Tier: <white>${tier.displayName}</white></gray>",
-            "<gray>Usos: <yellow>$newUses</yellow></gray>",
-            "",
-            "<dark_gray>Usa esto en un candado</dark_gray>",
-            "<dark_gray>para intentar abrirlo.</dark_gray>"
-        )
+        val tierConfig = config.getLockpickConfig(tier)
+        val tierKey = tier.name.lowercase()
+
+        // Get translated tier display name
+        val translatedTierName = messages.getRaw("items.tiers.lockpick.$tierKey")
+
+        // Get and process lore with updated uses
+        val lore = messages.getList("items.lockpick.lore").map { line ->
+            line.replace("{tier}", translatedTierName)
+                .replace("{uses}", newUses.toString())
+                .replace("{bonus}", tierConfig.successModifier.toString())
+        }
 
         @Suppress("DEPRECATION")
         meta.lore = lore.map { ItemBuilder.parseLegacy(it) }

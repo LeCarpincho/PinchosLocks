@@ -6,6 +6,7 @@ import dev.pincho.locks.models.Lock
 import dev.pincho.locks.models.LockTier
 import dev.pincho.locks.models.LockpickTier
 import dev.pincho.locks.utils.MessageUtils
+import dev.pincho.locks.utils.ParticleEffects
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.Particle
@@ -47,7 +48,8 @@ class LockpickManager(
         val location: Location,
         val startPosition: Location,  // Player's position when they started
         var progress: Int = 0,
-        var task: BukkitRunnable? = null
+        var task: BukkitRunnable? = null,
+        var particleTask: BukkitRunnable? = null // Animated particle effect
     )
 
     /**
@@ -143,6 +145,7 @@ class LockpickManager(
     fun cancelLockpicking(player: Player) {
         val session = activePickers.remove(player.uniqueId)
         session?.task?.cancel()
+        session?.particleTask?.cancel()
 
         if (session != null) {
             // Clear action bar
@@ -199,6 +202,11 @@ class LockpickManager(
 
         // Play starting sound
         player.playSound(session.location, Sound.BLOCK_IRON_DOOR_CLOSE, 0.5f, 1.5f)
+
+        // Start animated particle effect
+        val particleAnimation = ParticleEffects.createLockpickProgressAnimation(plugin, session.location, player)
+        particleAnimation.runTaskTimer(plugin, 0L, 2L)
+        session.particleTask = particleAnimation
 
         session.task = object : BukkitRunnable() {
             var ticks = 0
@@ -264,8 +272,8 @@ class LockpickManager(
                             cancel()
                             return
                         } else {
-                            // Just a stumble - play sound, show warning and continue
-                            player.playSound(session.location, Sound.BLOCK_CHAIN_BREAK, 0.7f, 0.8f)
+                            // Just a stumble - play effect, show warning and continue
+                            ParticleEffects.playLockpickStumbleEffect(plugin, session.location, player)
                             sendProgressBar(player, progress, lockTier, lockpickTier, stumble = true)
                         }
                     } else {
@@ -354,6 +362,7 @@ class LockpickManager(
      */
     private fun handleLockpickSuccess(player: Player, session: LockpickSession) {
         activePickers.remove(player.uniqueId)
+        session.particleTask?.cancel()
 
         // Set cooldown
         val cooldownTime = (config.getLockpickConfig(session.lockpickTier).cooldown * 1000).toLong()
@@ -362,15 +371,8 @@ class LockpickManager(
         // Use the lockpick (decrease durability)
         decreaseLockpickDurability(player, session.lockpickItem)
 
-        // Play success effects
-        player.playSound(session.location, config.soundLockpickSuccess, 1.0f, 1.0f)
-        session.location.world?.spawnParticle(
-            Particle.HAPPY_VILLAGER,
-            session.location.clone().add(0.5, 0.5, 0.5),
-            15,
-            0.3, 0.3, 0.3,
-            0.0
-        )
+        // Play success effects with enhanced particles
+        ParticleEffects.playLockpickSuccessEffect(plugin, session.location, player)
 
         // Send success message
         messages.send(player, "lockpick.success")
@@ -450,7 +452,7 @@ class LockpickManager(
                     block.world.playSound(location, sound, 1.0f, 1.0f)
 
                     // Schedule auto-close after 15 seconds
-                    scheduleAutoClose(block, location, 15)
+                    scheduleAutoClose(location, 15)
                     startAutoCloseTimer(player, 15)
                     return@Runnable
                 }
@@ -466,7 +468,7 @@ class LockpickManager(
                     block.world.playSound(location, sound, 1.0f, 1.0f)
 
                     // Schedule auto-close after 15 seconds
-                    scheduleAutoClose(block, location, 15)
+                    scheduleAutoClose(location, 15)
                     startAutoCloseTimer(player, 15)
                     return@Runnable
                 }
@@ -479,7 +481,7 @@ class LockpickManager(
                     block.world.playSound(location, Sound.BLOCK_FENCE_GATE_OPEN, 1.0f, 1.0f)
 
                     // Schedule auto-close after 15 seconds
-                    scheduleAutoClose(block, location, 15)
+                    scheduleAutoClose(location, 15)
                     startAutoCloseTimer(player, 15)
                     return@Runnable
                 }
@@ -506,20 +508,14 @@ class LockpickManager(
      */
     private fun handleLockpickFailure(player: Player, session: LockpickSession) {
         activePickers.remove(player.uniqueId)
+        session.particleTask?.cancel()
 
         // Set cooldown
         val cooldownTime = (config.getLockpickConfig(session.lockpickTier).cooldown * 1000).toLong()
         cooldowns[player.uniqueId] = System.currentTimeMillis() + cooldownTime
 
-        // Play failure effects
-        player.playSound(session.location, config.soundLockpickFail, 1.0f, 0.5f)
-        session.location.world?.spawnParticle(
-            Particle.SMOKE,
-            session.location.clone().add(0.5, 0.5, 0.5),
-            10,
-            0.2, 0.2, 0.2,
-            0.0
-        )
+        // Play failure effects with enhanced particles
+        ParticleEffects.playLockpickFailEffect(plugin, session.location, player)
 
         // Send failure message
         messages.send(player, "lockpick.failed")
@@ -534,24 +530,17 @@ class LockpickManager(
      */
     private fun handleLockpickBreak(player: Player, session: LockpickSession) {
         activePickers.remove(player.uniqueId)
+        session.particleTask?.cancel()
 
         // Set cooldown
         val cooldownTime = (config.getLockpickConfig(session.lockpickTier).cooldown * 1000).toLong()
         cooldowns[player.uniqueId] = System.currentTimeMillis() + cooldownTime
 
         // Break the lockpick
-        val broke = breakLockpick(player, session.lockpickItem)
+        breakLockpick(player)
 
-        // Play break effects
-        player.playSound(session.location, config.soundLockpickBreak, 1.0f, 0.3f)
-        session.location.world?.spawnParticle(
-            Particle.ITEM,
-            session.location.clone().add(0.5, 1.0, 0.5),
-            20,
-            0.2, 0.2, 0.2,
-            0.05,
-            session.lockpickItem
-        )
+        // Play break effects with enhanced particles
+        ParticleEffects.playLockpickBreakEffect(plugin, session.location, player, session.lockpickItem)
 
         // Send break message
         messages.send(player, "lockpick.broke")
@@ -649,32 +638,36 @@ class LockpickManager(
     /**
      * Breaks the lockpick completely.
      */
-    private fun breakLockpick(player: Player, item: ItemStack): Boolean {
+    private fun breakLockpick(player: Player) {
         val heldItem = player.inventory.itemInMainHand
         if (heldItem.amount <= 1) {
             player.inventory.setItemInMainHand(null)
         } else {
             heldItem.amount = heldItem.amount - 1
         }
-        return true
     }
 
     /**
      * Updates the lore of a lockpick to show remaining uses.
      */
+    @Suppress("UNUSED_PARAMETER")
     private fun updateLockpickLore(item: ItemStack, meta: org.bukkit.inventory.meta.ItemMeta, tier: LockpickTier, uses: Int) {
         val tierConfig = config.getLockpickConfig(tier)
-        val lore = listOf(
-            "",
-            "§7Tier: §f${tier.displayName}",
-            "§7Usos: §e$uses",
-            "§7Exito: §a+${tierConfig.successModifier}%",
-            "",
-            "§8Usa esto en un candado",
-            "§8para intentar abrirlo."
-        )
+        val tierKey = tier.name.lowercase()
+
+        // Get translated tier display name
+        val translatedTierName = messages.getRaw("items.tiers.lockpick.$tierKey")
+
+        // Get and process lore with updated uses
+        val lore = messages.getList("items.lockpick.lore").map { line ->
+            line.replace("{tier}", translatedTierName)
+                .replace("{uses}", uses.toString())
+                .replace("{bonus}", tierConfig.successModifier.toString())
+        }
+
         @Suppress("DEPRECATION")
-        meta.lore = lore
+        meta.lore = lore.map { net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection()
+            .serialize(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(it)) }
     }
 
     /**
@@ -753,7 +746,7 @@ class LockpickManager(
     /**
      * Schedules a door/trapdoor/gate to auto-close after the specified seconds.
      */
-    private fun scheduleAutoClose(block: org.bukkit.block.Block, location: Location, seconds: Int) {
+    private fun scheduleAutoClose(location: Location, seconds: Int) {
         object : BukkitRunnable() {
             override fun run() {
                 val currentBlock = location.block
@@ -912,6 +905,45 @@ class LockpickManager(
      */
     fun clearCooldown(player: UUID) {
         cooldowns.remove(player)
-        activePickers.remove(player)
+        val session = activePickers.remove(player)
+        session?.task?.cancel()
+        session?.particleTask?.cancel()
+        accessTimers[player]?.cancel()
+        accessTimers.remove(player)
+    }
+
+    /**
+     * Cleans up expired cooldowns to prevent memory leaks.
+     * Should be called periodically.
+     */
+    fun cleanupExpiredCooldowns() {
+        val now = System.currentTimeMillis()
+        cooldowns.entries.removeIf { it.value < now }
+    }
+
+    /**
+     * Gets the count of active lockpick sessions.
+     * Useful for debugging and monitoring.
+     */
+    fun getActivePickerCount(): Int = activePickers.size
+
+    /**
+     * Shuts down all active sessions and timers.
+     * Must be called on plugin disable to prevent memory leaks.
+     */
+    fun shutdown() {
+        // Cancel all active lockpick sessions
+        activePickers.values.forEach { session ->
+            session.task?.cancel()
+            session.particleTask?.cancel()
+        }
+        activePickers.clear()
+
+        // Cancel all access timers
+        accessTimers.values.forEach { it.cancel() }
+        accessTimers.clear()
+
+        // Clear cooldowns
+        cooldowns.clear()
     }
 }

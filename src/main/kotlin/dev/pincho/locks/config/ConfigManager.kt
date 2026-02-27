@@ -256,9 +256,11 @@ class ConfigManager(private val plugin: JavaPlugin) {
         val shulkers = config.getStringList("lockable-blocks.shulkers")
         val doors = config.getStringList("lockable-blocks.doors")
         val trapdoors = config.getStringList("lockable-blocks.trapdoors")
+        val fenceGates = config.getStringList("lockable-blocks.fence-gates")
 
-        if (containers.isNotEmpty() || shulkers.isNotEmpty() || doors.isNotEmpty() || trapdoors.isNotEmpty()) {
-            LockableBlock.updateFromConfig(containers, shulkers, doors, trapdoors)
+        if (containers.isNotEmpty() || shulkers.isNotEmpty() || doors.isNotEmpty() ||
+            trapdoors.isNotEmpty() || fenceGates.isNotEmpty()) {
+            LockableBlock.updateFromConfig(containers, shulkers, doors, trapdoors, fenceGates)
         }
     }
 

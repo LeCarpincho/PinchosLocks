@@ -6,6 +6,7 @@ import java.util.UUID
 
 /**
  * Represents a serializable location for storage.
+ * Optimized with cached key generation.
  */
 @Serializable
 data class SerializableLocation(
@@ -14,6 +15,12 @@ data class SerializableLocation(
     val y: Int,
     val z: Int
 ) {
+    // Cached key to avoid repeated string concatenation
+    // Using @Volatile for thread-safe lazy initialization
+    @kotlinx.serialization.Transient
+    @Volatile
+    private var cachedKey: String? = null
+
     companion object {
         fun fromBukkit(location: org.bukkit.Location): SerializableLocation {
             return SerializableLocation(
@@ -30,7 +37,21 @@ data class SerializableLocation(
         return org.bukkit.Location(world, x.toDouble(), y.toDouble(), z.toDouble())
     }
 
-    fun toKey(): String = "$world:$x:$y:$z"
+    /**
+     * Returns a cached location key for efficient lookups.
+     * Format: "worldname:x:y:z"
+     */
+    fun toKey(): String {
+        return cachedKey ?: buildString(world.length + 30) {
+            append(world)
+            append(':')
+            append(x)
+            append(':')
+            append(y)
+            append(':')
+            append(z)
+        }.also { cachedKey = it }
+    }
 
     override fun toString(): String = "$world ($x, $y, $z)"
 }
@@ -38,6 +59,11 @@ data class SerializableLocation(
 /**
  * Represents a lock placed on a block.
  * This is the core data model for the lock system.
+ *
+ * Optimizations:
+ * - Cached UUID parsing to avoid repeated conversion
+ * - Cached tier lookup
+ * - Efficient string-based UUID comparison for trusted checks
  */
 @Serializable
 data class Lock(
@@ -47,37 +73,70 @@ data class Lock(
     val tier: String,
     val location: SerializableLocation,
     val createdAt: Long,
-    val trustedPlayers: MutableSet<String> = mutableSetOf(),
-    val keyIds: MutableSet<String> = mutableSetOf()
+    val trustedPlayers: MutableSet<String> = java.util.concurrent.ConcurrentHashMap.newKeySet()
 ) {
+    // Cached parsed values to avoid repeated parsing
+    @kotlinx.serialization.Transient
+    private var cachedOwnerUUID: UUID? = null
+
+    @kotlinx.serialization.Transient
+    private var cachedTier: LockTier? = null
+
+    @kotlinx.serialization.Transient
+    private var cachedCreatedAt: Instant? = null
+
     /**
      * Gets the owner UUID as a Java UUID.
+     * Cached for performance.
      */
-    fun getOwnerUUID(): UUID = UUID.fromString(ownerUUID)
+    fun getOwnerUUID(): UUID {
+        return cachedOwnerUUID ?: UUID.fromString(ownerUUID).also { cachedOwnerUUID = it }
+    }
 
     /**
      * Gets the lock tier enum.
+     * Cached for performance.
      */
-    fun getTier(): LockTier = LockTier.fromString(tier) ?: LockTier.BRONZE
+    fun getTier(): LockTier {
+        return cachedTier ?: (LockTier.fromString(tier) ?: LockTier.BRONZE).also { cachedTier = it }
+    }
 
     /**
      * Gets the creation time as an Instant.
+     * Cached for performance.
      */
-    fun getCreatedAt(): Instant = Instant.ofEpochMilli(createdAt)
+    fun getCreatedAt(): Instant {
+        return cachedCreatedAt ?: Instant.ofEpochMilli(createdAt).also { cachedCreatedAt = it }
+    }
 
     /**
      * Checks if a player has access to this lock.
+     * Optimized: compares strings directly without UUID parsing.
      * @param playerUUID The UUID of the player to check
      * @return true if the player is the owner or is trusted
      */
     fun hasAccess(playerUUID: UUID): Boolean {
-        return playerUUID.toString() == ownerUUID || playerUUID.toString() in trustedPlayers
+        val playerUuidStr = playerUUID.toString()
+        return playerUuidStr == ownerUUID || playerUuidStr in trustedPlayers
+    }
+
+    /**
+     * Checks if a player has access using string UUID (avoids UUID parsing).
+     * More efficient when UUID string is already available.
+     */
+    fun hasAccessByString(playerUuidStr: String): Boolean {
+        return playerUuidStr == ownerUUID || playerUuidStr in trustedPlayers
     }
 
     /**
      * Checks if a player is the owner of this lock.
      */
     fun isOwner(playerUUID: UUID): Boolean = playerUUID.toString() == ownerUUID
+
+    /**
+     * Checks if a player is the owner using string UUID.
+     */
+    fun isOwnerByString(playerUuidStr: String): Boolean = playerUuidStr == ownerUUID
 
     /**
      * Adds a trusted player to the lock.
@@ -96,34 +155,24 @@ data class Lock(
     }
 
     /**
-     * Checks if a player is trusted (but not owner).
+     * Checks if a player is in the trusted list.
+     * Note: Owner is automatically added to trusted on lock creation.
      */
     fun isTrusted(playerUUID: UUID): Boolean {
         return playerUUID.toString() in trustedPlayers
     }
 
     /**
-     * Adds a key ID to this lock.
+     * Checks if a player is trusted using string UUID.
      */
-    fun addKeyId(keyId: String): Boolean {
-        return keyIds.add(keyId)
+    fun isTrustedByString(playerUuidStr: String): Boolean {
+        return playerUuidStr in trustedPlayers
     }
-
-    /**
-     * Checks if a key ID is valid for this lock.
-     */
-    fun isValidKey(keyId: String): Boolean {
-        return keyId in keyIds
-    }
-
-    /**
-     * Gets the number of keys issued for this lock.
-     */
-    fun getKeyCount(): Int = keyIds.size
 
     companion object {
         /**
-         * Creates a new lock with generated IDs.
+         * Creates a new lock with generated ID.
+         * IMPORTANT: Owner is automatically added to trustedPlayers as failsafe
          */
         fun create(
             owner: org.bukkit.entity.Player,
@@ -131,17 +180,18 @@ data class Lock(
             location: org.bukkit.Location
         ): Lock {
             val lockId = UUID.randomUUID().toString().substring(0, 8)
-            val keyId = UUID.randomUUID().toString().substring(0, 8)
+            val ownerUuidString = owner.uniqueId.toString()
 
             return Lock(
                 id = lockId,
-                ownerUUID = owner.uniqueId.toString(),
+                ownerUUID = ownerUuidString,
                 ownerName = owner.name,
                 tier = tier.name,
                 location = SerializableLocation.fromBukkit(location),
                 createdAt = System.currentTimeMillis(),
-                trustedPlayers = mutableSetOf(),
-                keyIds = mutableSetOf(keyId)
+                // Owner is automatically added to trusted as failsafe
+                // Using ConcurrentHashMap.newKeySet() for thread-safety
+                trustedPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet<String>().apply { add(ownerUuidString) }
             )
         }
     }

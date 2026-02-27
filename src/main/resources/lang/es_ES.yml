@@ -69,12 +69,14 @@ lock:
   cannot-break: "<red>No puedes romper este bloque! Esta protegido con un candado.</red>"
   not-looking: "<red>Debes mirar un bloque para usar este comando.</red>"
   tier-locked: "<red>No tienes permiso para usar candados de tier <white>{tier}</white>.</red>"
+  limit-reached: "<red>Has alcanzado el limite de candados! (<white>{current}/{max}</white>)</red>"
 
   # ─── Acceso ─────────────────────────────────────────────────────────────────
   access-denied: "<red>Este bloque esta protegido con un candado.</red>"
-  access-denied-lockpick: "<red>Este bloque esta protegido con un candado.</red><newline><gray>Necesitas una <yellow>ganzua</yellow> para forzarlo.</gray>"
+  access-denied-lockpick: "<red>Este bloque esta protegido con un candado.</red><newline><gray>Necesitas ser <yellow>trusted</yellow> o usar una <yellow>ganzua</yellow>.</gray>"
   access-granted: "<green>Has abierto el candado con tu llave.</green>"
-  bypass: "<yellow>Has usado tu permiso de bypass para acceder.</yellow>"
+  bypass: "<yellow><bold>⚡</bold> Has usado tu permiso de STAFF para abrir este candado.</yellow>"
+  secured: "<red><bold>🔒</bold> El candado se ha vuelto a cerrar.</red>"
 
   # ─── Informacion del Candado ────────────────────────────────────────────────
   info:
@@ -85,18 +87,6 @@ lock:
     trusted: "<gray>Confiados: <white>{trusted}</white></gray>"
     location: "<gray>Ubicacion: <white>{world} ({x}, {y}, {z})</white></gray>"
     footer: "<gray><strikethrough>                                        </strikethrough></gray>"
-
-
-# ┌──────────────────────────────────────────────────────────────────────────────┐
-# │                           MENSAJES DE LLAVES                                  │
-# └──────────────────────────────────────────────────────────────────────────────┘
-
-key:
-  received: "<green>Has recibido una llave para el candado.</green>"
-  given: "<green>Has dado una llave a <white>{player}</white>.</green>"
-  no-key: "<red>No tienes la llave correcta para este candado.</red>"
-  max-keys: "<red>Este candado ya tiene el maximo de llaves permitidas.</red>"
-  duplicate-created: "<green>Has creado una copia de la llave.</green>"
 
 
 # ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -177,7 +167,6 @@ help:
   trust: "<gold>/lock trust <player></gold> <gray>- Da acceso a un jugador</gray>"
   untrust: "<gold>/lock untrust <player></gold> <gray>- Quita acceso a un jugador</gray>"
   trustlist: "<gold>/lock trustlist</gold> <gray>- Lista jugadores con acceso</gray>"
-  key: "<gold>/lock key</gold> <gray>- Obtiene una llave para tu candado</gray>"
   reload: "<gold>/lock reload</gold> <gray>- Recarga la configuracion</gray>"
   footer: "<gray><strikethrough>                                        </strikethrough></gray>"
 
@@ -190,39 +179,51 @@ items:
 
   # ─── Candados ───────────────────────────────────────────────────────────────
   lock:
-    name: "<gold>{tier} Lock</gold>"
+    # Nombres por tier
+    name:
+      bronze: "<#CD7F32>Candado de Bronce</#CD7F32>"
+      silver: "<#C0C0C0>Candado de Plata</#C0C0C0>"
+      gold: "<#FFD700>Candado de Oro</#FFD700>"
+    # Lore general (aplica a todos los tiers)
     lore:
       - ""
       - "<gray>Coloca este candado en un bloque</gray>"
       - "<gray>para protegerlo de otros jugadores.</gray>"
       - ""
+      - "<dark_gray>Tier: <white>{tier}</white></dark_gray>"
+      - ""
       - "<yellow>Click derecho para colocar</yellow>"
-
-  # ─── Llaves ─────────────────────────────────────────────────────────────────
-  key:
-    name: "<aqua>Llave de Candado</aqua>"
-    lore:
-      - ""
-      - "<gray>Esta llave abre un candado especifico.</gray>"
-      - ""
-      - "<dark_gray>ID: <white>{id}</white></dark_gray>"
-      - "<dark_gray>Dueno: <white>{owner}</white></dark_gray>"
-      - ""
-      - "<yellow>Click derecho para usar</yellow>"
 
   # ─── Ganzuas ────────────────────────────────────────────────────────────────
   lockpick:
-    name: "<gray>{tier} Lockpick</gray>"
+    # Nombres por tier
+    name:
+      basic: "<gray>Ganzua Basica</gray>"
+      advanced: "<aqua>Ganzua Avanzada</aqua>"
+      master: "<light_purple>Ganzua Maestra</light_purple>"
+    # Lore general (aplica a todos los tiers)
     lore:
       - ""
       - "<gray>Usa esta ganzua para intentar</gray>"
       - "<gray>forzar candados ajenos.</gray>"
       - ""
-      - "<dark_gray>Durabilidad: <white>{durability}</white></dark_gray>"
+      - "<dark_gray>Tier: <white>{tier}</white></dark_gray>"
+      - "<dark_gray>Usos: <yellow>{uses}</yellow></dark_gray>"
       - "<dark_gray>Bonus: <green>+{bonus}%</green></dark_gray>"
       - ""
       - "<yellow>Click derecho en un candado</yellow>"
       - "<yellow>mientras estas agachado</yellow>"
+
+  # ─── Nombres de tiers traducidos ────────────────────────────────────────────
+  tiers:
+    lock:
+      bronze: "Bronce"
+      silver: "Plata"
+      gold: "Oro"
+    lockpick:
+      basic: "Basica"
+      advanced: "Avanzada"
+      master: "Maestra"
 
 
 # ╔════════════════════════════════════════════════════════════════════════════════╗

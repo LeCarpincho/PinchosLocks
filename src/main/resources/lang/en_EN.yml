@@ -69,12 +69,14 @@ lock:
   cannot-break: "<red>You cannot break this block! It is protected with a lock.</red>"
   not-looking: "<red>You must be looking at a block to use this command.</red>"
   tier-locked: "<red>You don't have permission to use <white>{tier}</white> tier locks.</red>"
+  limit-reached: "<red>You have reached the lock limit! (<white>{current}/{max}</white>)</red>"
 
   # ─── Access ─────────────────────────────────────────────────────────────────
   access-denied: "<red>This block is protected with a lock.</red>"
-  access-denied-lockpick: "<red>This block is protected with a lock.</red><newline><gray>You need a <yellow>lockpick</yellow> to force it open.</gray>"
+  access-denied-lockpick: "<red>This block is protected with a lock.</red><newline><gray>You need to be <yellow>trusted</yellow> or use a <yellow>lockpick</yellow>.</gray>"
   access-granted: "<green>You opened the lock with your key.</green>"
-  bypass: "<yellow>You used your bypass permission to access.</yellow>"
+  bypass: "<yellow><bold>⚡</bold> You used your STAFF permission to open this lock.</yellow>"
+  secured: "<red><bold>🔒</bold> The lock has been secured again.</red>"
 
   # ─── Lock Info ──────────────────────────────────────────────────────────────
   info:
@@ -85,18 +87,6 @@ lock:
     trusted: "<gray>Trusted: <white>{trusted}</white></gray>"
     location: "<gray>Location: <white>{world} ({x}, {y}, {z})</white></gray>"
     footer: "<gray><strikethrough>                                        </strikethrough></gray>"
-
-
-# ┌──────────────────────────────────────────────────────────────────────────────┐
-# │                             KEY MESSAGES                                      │
-# └──────────────────────────────────────────────────────────────────────────────┘
-
-key:
-  received: "<green>You received a key for the lock.</green>"
-  given: "<green>You gave a key to <white>{player}</white>.</green>"
-  no-key: "<red>You don't have the correct key for this lock.</red>"
-  max-keys: "<red>This lock already has the maximum number of keys.</red>"
-  duplicate-created: "<green>You created a duplicate of the key.</green>"
 
 
 # ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -177,7 +167,6 @@ help:
   trust: "<gold>/lock trust <player></gold> <gray>- Give a player access</gray>"
   untrust: "<gold>/lock untrust <player></gold> <gray>- Remove a player's access</gray>"
   trustlist: "<gold>/lock trustlist</gold> <gray>- List players with access</gray>"
-  key: "<gold>/lock key</gold> <gray>- Get a key for your lock</gray>"
   reload: "<gold>/lock reload</gold> <gray>- Reload the configuration</gray>"
   footer: "<gray><strikethrough>                                        </strikethrough></gray>"
 
@@ -190,39 +179,51 @@ items:
 
   # ─── Locks ──────────────────────────────────────────────────────────────────
   lock:
-    name: "<gold>{tier} Lock</gold>"
+    # Names per tier
+    name:
+      bronze: "<#CD7F32>Bronze Lock</#CD7F32>"
+      silver: "<#C0C0C0>Silver Lock</#C0C0C0>"
+      gold: "<#FFD700>Gold Lock</#FFD700>"
+    # General lore (applies to all tiers)
     lore:
       - ""
       - "<gray>Place this lock on a block</gray>"
       - "<gray>to protect it from other players.</gray>"
       - ""
+      - "<dark_gray>Tier: <white>{tier}</white></dark_gray>"
+      - ""
       - "<yellow>Right-click to place</yellow>"
-
-  # ─── Keys ───────────────────────────────────────────────────────────────────
-  key:
-    name: "<aqua>Lock Key</aqua>"
-    lore:
-      - ""
-      - "<gray>This key opens a specific lock.</gray>"
-      - ""
-      - "<dark_gray>ID: <white>{id}</white></dark_gray>"
-      - "<dark_gray>Owner: <white>{owner}</white></dark_gray>"
-      - ""
-      - "<yellow>Right-click to use</yellow>"
 
   # ─── Lockpicks ──────────────────────────────────────────────────────────────
   lockpick:
-    name: "<gray>{tier} Lockpick</gray>"
+    # Names per tier
+    name:
+      basic: "<gray>Basic Lockpick</gray>"
+      advanced: "<aqua>Advanced Lockpick</aqua>"
+      master: "<light_purple>Master Lockpick</light_purple>"
+    # General lore (applies to all tiers)
     lore:
       - ""
       - "<gray>Use this lockpick to attempt</gray>"
       - "<gray>to force open other locks.</gray>"
       - ""
-      - "<dark_gray>Durability: <white>{durability}</white></dark_gray>"
+      - "<dark_gray>Tier: <white>{tier}</white></dark_gray>"
+      - "<dark_gray>Uses: <yellow>{uses}</yellow></dark_gray>"
       - "<dark_gray>Bonus: <green>+{bonus}%</green></dark_gray>"
       - ""
       - "<yellow>Right-click on a lock</yellow>"
       - "<yellow>while sneaking</yellow>"
+
+  # ─── Translated tier names ──────────────────────────────────────────────────
+  tiers:
+    lock:
+      bronze: "Bronze"
+      silver: "Silver"
+      gold: "Gold"
+    lockpick:
+      basic: "Basic"
+      advanced: "Advanced"
+      master: "Master"
 
 
 # ╔════════════════════════════════════════════════════════════════════════════════╗

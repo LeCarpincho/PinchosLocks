@@ -10,7 +10,8 @@ enum class LockableBlockCategory {
     CONTAINER,
     SHULKER,
     DOOR,
-    TRAPDOOR
+    TRAPDOOR,
+    FENCE_GATE
 }
 
 /**
@@ -38,11 +39,16 @@ object LockableBlock {
         .filter { it.name.endsWith("_TRAPDOOR") && it.isBlock }
         .toSet()
 
+    private val defaultFenceGates = Material.entries
+        .filter { it.name.endsWith("_FENCE_GATE") && it.isBlock }
+        .toSet()
+
     // Mutable sets that can be modified by config
     private val containers = defaultContainers.toMutableSet()
     private val shulkers = defaultShulkers.toMutableSet()
     private val doors = defaultDoors.toMutableSet()
     private val trapdoors = defaultTrapdoors.toMutableSet()
+    private val fenceGates = defaultFenceGates.toMutableSet()
 
     /**
      * Updates the lockable blocks from configuration.
@@ -51,12 +57,14 @@ object LockableBlock {
         containerList: List<String>,
         shulkerList: List<String>,
         doorList: List<String>,
-        trapdoorList: List<String>
+        trapdoorList: List<String>,
+        fenceGateList: List<String> = emptyList()
     ) {
         containers.clear()
         shulkers.clear()
         doors.clear()
         trapdoors.clear()
+        fenceGates.clear()
 
         containerList.mapNotNull { runCatching { Material.valueOf(it) }.getOrNull() }
             .forEach { containers.add(it) }
@@ -69,6 +77,9 @@ object LockableBlock {
 
         trapdoorList.mapNotNull { runCatching { Material.valueOf(it) }.getOrNull() }
             .forEach { trapdoors.add(it) }
+
+        fenceGateList.mapNotNull { runCatching { Material.valueOf(it) }.getOrNull() }
+            .forEach { fenceGates.add(it) }
     }
 
     /**
@@ -78,7 +89,8 @@ object LockableBlock {
         return material in containers ||
                 material in shulkers ||
                 material in doors ||
-                material in trapdoors
+                material in trapdoors ||
+                material in fenceGates
     }
 
     /**
@@ -95,6 +107,7 @@ object LockableBlock {
             material in shulkers -> LockableBlockCategory.SHULKER
             material in doors -> LockableBlockCategory.DOOR
             material in trapdoors -> LockableBlockCategory.TRAPDOOR
+            material in fenceGates -> LockableBlockCategory.FENCE_GATE
             else -> null
         }
     }
@@ -110,7 +123,12 @@ object LockableBlock {
     fun isContainer(material: Material): Boolean = material in containers || material in shulkers
 
     /**
+     * Checks if a material is a fence gate type.
+     */
+    fun isFenceGate(material: Material): Boolean = material in fenceGates
+
+    /**
      * Gets all lockable materials.
      */
-    fun getAllLockable(): Set<Material> = containers + shulkers + doors + trapdoors
+    fun getAllLockable(): Set<Material> = containers + shulkers + doors + trapdoors + fenceGates
 }
