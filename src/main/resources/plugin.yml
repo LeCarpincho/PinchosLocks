@@ -1,0 +1,152 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+#   ██████╗ ██╗███╗   ██╗ ██████╗██╗  ██╗ ██████╗ ███████╗    ██╗      ██████╗  ██████╗██╗  ██╗███████╗
+#   ██╔══██╗██║████╗  ██║██╔════╝██║  ██║██╔═══██╗██╔════╝    ██║     ██╔═══██╗██╔════╝██║ ██╔╝██╔════╝
+#   ██████╔╝██║██╔██╗ ██║██║     ███████║██║   ██║███████╗    ██║     ██║   ██║██║     █████╔╝ ███████╗
+#   ██╔═══╝ ██║██║╚██╗██║██║     ██╔══██║██║   ██║╚════██║    ██║     ██║   ██║██║     ██╔═██╗ ╚════██║
+#   ██║     ██║██║ ╚████║╚██████╗██║  ██║╚██████╔╝███████║    ███████╗╚██████╔╝╚██████╗██║  ██╗███████║
+#   ╚═╝     ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝
+#
+#   A premium lock & security system for Minecraft servers
+#   Compatible with: Paper, Spigot, Bukkit (1.21+)
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─── Plugin Information ───────────────────────────────────────────────────────
+name: PinchosLocks
+version: ${version}
+main: dev.pincho.locks.PinchosLocks
+api-version: '1.21'
+description: ${description}
+author: MrSingu
+authors: [MrSingu]
+website: https://github.com/LeCarpincho/PinchosLocks
+load: STARTUP
+
+# ─── Optional Dependencies ────────────────────────────────────────────────────
+softdepend:
+  - Vault
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                                  COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+commands:
+
+  # ─── Main Lock Command ──────────────────────────────────────────────────────
+  lock:
+    description: Main command for the lock system
+    usage: |
+      /<command> - Place a lock / Show help
+      /<command> info - View lock information
+      /<command> remove - Remove a lock
+      /<command> trust <player> - Trust a player
+      /<command> untrust <player> - Untrust a player
+      /<command> trustlist - List trusted players
+      /<command> key - Get a key for your lock
+      /<command> give <player> <tier> [amount] - Give locks (Admin)
+      /<command> reload - Reload config (Admin)
+    aliases: [candado, pl]
+
+  # ─── Lockpick Command ───────────────────────────────────────────────────────
+  lockpick:
+    description: Command for lockpick management
+    usage: |
+      /<command> - Show lockpick help
+      /<command> give <player> <tier> [amount] - Give lockpicks (Admin)
+    aliases: [ganzua, lp]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                                 PERMISSIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+permissions:
+
+  # ─── Wildcard (All Permissions) ─────────────────────────────────────────────
+  pinchoslocks.*:
+    description: Grants ALL PinchosLocks permissions
+    default: op
+    children:
+      pinchoslocks.use: true
+      pinchoslocks.admin: true
+      pinchoslocks.bypass: true
+      pinchoslocks.bypass.cooldown: true
+      pinchoslocks.tier.bronze: true
+      pinchoslocks.tier.silver: true
+      pinchoslocks.tier.gold: true
+      pinchoslocks.lockpick.use: true
+      pinchoslocks.lockpick.basic: true
+      pinchoslocks.lockpick.advanced: true
+      pinchoslocks.lockpick.master: true
+      pinchoslocks.lockpick.give: true
+      pinchoslocks.trust: true
+      pinchoslocks.info: true
+      pinchoslocks.key: true
+
+  # ─── Basic Usage ────────────────────────────────────────────────────────────
+  pinchoslocks.use:
+    description: Allows basic lock features (place/remove own locks)
+    default: true
+
+  pinchoslocks.trust:
+    description: Allows trusting other players to your locks
+    default: true
+
+  pinchoslocks.info:
+    description: Allows viewing lock information
+    default: true
+
+  pinchoslocks.key:
+    description: Allows creating keys for your locks
+    default: true
+
+  # ─── Lock Tiers ─────────────────────────────────────────────────────────────
+  pinchoslocks.tier.bronze:
+    description: Allows using Bronze tier locks
+    default: true
+
+  pinchoslocks.tier.silver:
+    description: Allows using Silver tier locks
+    default: false
+
+  pinchoslocks.tier.gold:
+    description: Allows using Gold tier locks
+    default: false
+
+  # ─── Lockpick Permissions ───────────────────────────────────────────────────
+  pinchoslocks.lockpick.use:
+    description: Allows using lockpicks in general
+    default: true
+
+  pinchoslocks.lockpick.basic:
+    description: Allows using Basic lockpicks
+    default: true
+
+  pinchoslocks.lockpick.advanced:
+    description: Allows using Advanced lockpicks
+    default: true
+
+  pinchoslocks.lockpick.master:
+    description: Allows using Master lockpicks
+    default: true
+
+  pinchoslocks.lockpick.give:
+    description: Allows giving lockpicks to players
+    default: op
+
+  # ─── Admin Permissions ──────────────────────────────────────────────────────
+  pinchoslocks.admin:
+    description: Allows admin commands (give, reload, etc.)
+    default: op
+
+  pinchoslocks.bypass:
+    description: Allows bypassing ALL locks (open any lock)
+    default: op
+
+  pinchoslocks.bypass.cooldown:
+    description: Bypasses all cooldowns
+    default: op
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              END OF PLUGIN.YML
+# ═══════════════════════════════════════════════════════════════════════════════

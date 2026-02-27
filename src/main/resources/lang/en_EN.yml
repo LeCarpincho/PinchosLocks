@@ -1,0 +1,230 @@
+# ╔════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                ║
+# ║   ██████╗ ██╗███╗   ██╗ ██████╗██╗  ██╗ ██████╗ ███████╗                       ║
+# ║   ██╔══██╗██║████╗  ██║██╔════╝██║  ██║██╔═══██╗██╔════╝                       ║
+# ║   ██████╔╝██║██╔██╗ ██║██║     ███████║██║   ██║███████╗                       ║
+# ║   ██╔═══╝ ██║██║╚██╗██║██║     ██╔══██║██║   ██║╚════██║                       ║
+# ║   ██║     ██║██║ ╚████║╚██████╗██║  ██║╚██████╔╝███████║                       ║
+# ║   ╚═╝     ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝                       ║
+# ║                                                                                ║
+# ║                       LANGUAGE FILE - ENGLISH                                  ║
+# ║                          Author: MrSingu                                       ║
+# ║                  GitHub: github.com/LeCarpincho                                ║
+# ║                                                                                ║
+# ╚════════════════════════════════════════════════════════════════════════════════╝
+#
+# Format: MiniMessage (https://docs.advntr.dev/minimessage/format.html)
+#
+# Available colors:
+#   <red>, <green>, <blue>, <yellow>, <gold>, <gray>, <white>, <black>
+#   <dark_red>, <dark_green>, <dark_blue>, <dark_aqua>, <dark_purple>
+#   <aqua>, <light_purple>
+#
+# Formats:
+#   <bold>, <italic>, <underlined>, <strikethrough>, <obfuscated>
+#
+# HEX colors:
+#   <#FF5555>text</#FF5555>
+#
+# Gradients:
+#   <gradient:red:blue>text</gradient>
+#
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                                PREFIX                                         │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+prefix: "<dark_gray>[<gradient:#FFD700:#FFA500>PinchosLocks</gradient>]</dark_gray> "
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          GENERAL MESSAGES                                     │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+general:
+  reload: "<green>Configuration reloaded successfully.</green>"
+  no-permission: "<red>You don't have permission to do this.</red>"
+  player-only: "<red>This command can only be used by players.</red>"
+  player-not-found: "<red>Player not found: <white>{player}</white></red>"
+  invalid-tier: "<red>Invalid tier. Use: <white>bronze, silver, gold</white></red>"
+  invalid-amount: "<red>Invalid amount. Must be a positive number.</red>"
+  cooldown: "<yellow>You must wait <white>{time}</white> seconds.</yellow>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                            LOCK MESSAGES                                      │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+lock:
+  # ─── Actions ────────────────────────────────────────────────────────────────
+  placed: "<green>You placed a <white>{tier}</white> lock on this block.</green>"
+  removed: "<green>You removed the lock from this block.</green>"
+
+  # ─── Errors ─────────────────────────────────────────────────────────────────
+  already-locked: "<red>This block already has a lock.</red>"
+  not-locked: "<red>This block doesn't have a lock.</red>"
+  not-owner: "<red>You are not the owner of this lock.</red>"
+  cannot-lock: "<red>You cannot place a lock on this type of block.</red>"
+  cannot-break: "<red>You cannot break this block! It is protected with a lock.</red>"
+  not-looking: "<red>You must be looking at a block to use this command.</red>"
+  tier-locked: "<red>You don't have permission to use <white>{tier}</white> tier locks.</red>"
+
+  # ─── Access ─────────────────────────────────────────────────────────────────
+  access-denied: "<red>This block is protected with a lock.</red>"
+  access-denied-lockpick: "<red>This block is protected with a lock.</red><newline><gray>You need a <yellow>lockpick</yellow> to force it open.</gray>"
+  access-granted: "<green>You opened the lock with your key.</green>"
+  bypass: "<yellow>You used your bypass permission to access.</yellow>"
+
+  # ─── Lock Info ──────────────────────────────────────────────────────────────
+  info:
+    header: "<gray><strikethrough>          </strikethrough> <gold><bold>LOCK INFO</bold></gold> <strikethrough>          </strikethrough></gray>"
+    owner: "<gray>Owner: <white>{owner}</white></gray>"
+    tier: "<gray>Tier: <white>{tier}</white></gray>"
+    created: "<gray>Created: <white>{date}</white></gray>"
+    trusted: "<gray>Trusted: <white>{trusted}</white></gray>"
+    location: "<gray>Location: <white>{world} ({x}, {y}, {z})</white></gray>"
+    footer: "<gray><strikethrough>                                        </strikethrough></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                             KEY MESSAGES                                      │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+key:
+  received: "<green>You received a key for the lock.</green>"
+  given: "<green>You gave a key to <white>{player}</white>.</green>"
+  no-key: "<red>You don't have the correct key for this lock.</red>"
+  max-keys: "<red>This lock already has the maximum number of keys.</red>"
+  duplicate-created: "<green>You created a duplicate of the key.</green>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                           TRUST MESSAGES                                      │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+trust:
+  added: "<green>You gave <white>{player}</white> access to your lock.</green>"
+  removed: "<green>You removed <white>{player}</white>'s access to your lock.</green>"
+  already-trusted: "<yellow><white>{player}</white> already has access to this lock.</yellow>"
+  not-trusted: "<yellow><white>{player}</white> doesn't have access to this lock.</yellow>"
+  self: "<red>You cannot trust yourself.</red>"
+  list-header: "<gray>Players with access:</gray>"
+  list-empty: "<gray>No one has access to this lock.</gray>"
+  list-entry: "<gray>  - <white>{player}</white></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          LOCKPICK MESSAGES                                    │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+lockpick:
+  # ─── Status ─────────────────────────────────────────────────────────────────
+  attempting: "<yellow>Attempting to pick the lock...</yellow>"
+  success: "<green>You picked the lock! You have <white>15 seconds</white> to open it.</green>"
+  failed: "<red>You failed to pick the lock.</red>"
+  broke: "<red>Your lockpick broke!</red>"
+  cancelled: "<yellow>Lockpicking cancelled.</yellow>"
+
+  # ─── Errors ─────────────────────────────────────────────────────────────────
+  not-pickable: "<red>This lock cannot be picked.</red>"
+  disabled: "<red>Lockpicks are disabled on this server.</red>"
+  invalid-tier: "<red>Invalid tier. Use: <white>basic, advanced, master</white></red>"
+  already-have-access: "<yellow>You already have access to this lock.</yellow>"
+  too-weak: "<red>This lockpick is too weak for this lock. You need a higher tier lockpick.</red>"
+
+  # ─── Requirements ───────────────────────────────────────────────────────────
+  must-sneak: "<red>You must be sneaking (Shift) to pick a lock.</red>"
+  stood-up: "<red>You stood up! Lockpicking cancelled.</red>"
+  moved-away: "<red>You moved too far from the lock!</red>"
+  switched-item: "<red>You switched items! Lockpicking cancelled.</red>"
+  too-far: "<red>You moved too far from the lock!</red>"
+
+  # ─── Owner Notifications ────────────────────────────────────────────────────
+  owner-broke-notification: "<yellow><bold>!</bold></yellow> <gray>Someone broke a lockpick trying to open your <white>{block}</white>!</gray>"
+  owner-success-notification: "<red><bold>ALERT!</bold></red> <gray>Someone has lockpicked your <white>{block}</white>!</gray>"
+
+  # ─── Commands ───────────────────────────────────────────────────────────────
+  give-success: "<green>You gave <white>{amount}x {tier} Lockpick</white> to <white>{player}</white>.</green>"
+
+  # ─── Command Help ───────────────────────────────────────────────────────────
+  help:
+    header: "<gray><strikethrough>          </strikethrough> <gold><bold>LOCKPICK HELP</bold></gold> <strikethrough>          </strikethrough></gray>"
+    lockpick: "<gold>/lockpick</gold> <gray>- Show this help</gray>"
+    give: "<gold>/lockpick give <player> <tier> [amount]</gold> <gray>- Give lockpicks</gray>"
+    footer: "<gray><strikethrough>                                        </strikethrough></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                            ADMIN MESSAGES                                     │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+admin:
+  give-success: "<green>You gave <white>{amount}x {item}</white> to <white>{player}</white>.</green>"
+  give-fail: "<red>Could not give item to <white>{player}</white>. Inventory full?</red>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                            COMMAND HELP                                       │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+help:
+  header: "<gray><strikethrough>          </strikethrough> <gradient:#FFD700:#FFA500><bold>PINCHOS LOCKS</bold></gradient> <strikethrough>          </strikethrough></gray>"
+  lock: "<gold>/lock</gold> <gray>- Place a lock on the block you're looking at</gray>"
+  give: "<gold>/lock give <player> <tier> [amount]</gold> <gray>- Give locks</gray>"
+  info: "<gold>/lock info</gold> <gray>- Show info of the lock you're looking at</gray>"
+  remove: "<gold>/lock remove</gold> <gray>- Remove the lock from the block you're looking at</gray>"
+  trust: "<gold>/lock trust <player></gold> <gray>- Give a player access</gray>"
+  untrust: "<gold>/lock untrust <player></gold> <gray>- Remove a player's access</gray>"
+  trustlist: "<gold>/lock trustlist</gold> <gray>- List players with access</gray>"
+  key: "<gold>/lock key</gold> <gray>- Get a key for your lock</gray>"
+  reload: "<gold>/lock reload</gold> <gray>- Reload the configuration</gray>"
+  footer: "<gray><strikethrough>                                        </strikethrough></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          ITEM NAMES AND LORE                                  │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+items:
+
+  # ─── Locks ──────────────────────────────────────────────────────────────────
+  lock:
+    name: "<gold>{tier} Lock</gold>"
+    lore:
+      - ""
+      - "<gray>Place this lock on a block</gray>"
+      - "<gray>to protect it from other players.</gray>"
+      - ""
+      - "<yellow>Right-click to place</yellow>"
+
+  # ─── Keys ───────────────────────────────────────────────────────────────────
+  key:
+    name: "<aqua>Lock Key</aqua>"
+    lore:
+      - ""
+      - "<gray>This key opens a specific lock.</gray>"
+      - ""
+      - "<dark_gray>ID: <white>{id}</white></dark_gray>"
+      - "<dark_gray>Owner: <white>{owner}</white></dark_gray>"
+      - ""
+      - "<yellow>Right-click to use</yellow>"
+
+  # ─── Lockpicks ──────────────────────────────────────────────────────────────
+  lockpick:
+    name: "<gray>{tier} Lockpick</gray>"
+    lore:
+      - ""
+      - "<gray>Use this lockpick to attempt</gray>"
+      - "<gray>to force open other locks.</gray>"
+      - ""
+      - "<dark_gray>Durability: <white>{durability}</white></dark_gray>"
+      - "<dark_gray>Bonus: <green>+{bonus}%</green></dark_gray>"
+      - ""
+      - "<yellow>Right-click on a lock</yellow>"
+      - "<yellow>while sneaking</yellow>"
+
+
+# ╔════════════════════════════════════════════════════════════════════════════════╗
+# ║                             END OF FILE                                        ║
+# ╚════════════════════════════════════════════════════════════════════════════════╝

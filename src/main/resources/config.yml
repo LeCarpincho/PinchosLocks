@@ -1,0 +1,411 @@
+# ╔════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                ║
+# ║   ██████╗ ██╗███╗   ██╗ ██████╗██╗  ██╗ ██████╗ ███████╗                       ║
+# ║   ██╔══██╗██║████╗  ██║██╔════╝██║  ██║██╔═══██╗██╔════╝                       ║
+# ║   ██████╔╝██║██╔██╗ ██║██║     ███████║██║   ██║███████╗                       ║
+# ║   ██╔═══╝ ██║██║╚██╗██║██║     ██╔══██║██║   ██║╚════██║                       ║
+# ║   ██║     ██║██║ ╚████║╚██████╗██║  ██║╚██████╔╝███████║                       ║
+# ║   ╚═╝     ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝                       ║
+# ║                                                                                ║
+# ║   ██╗      ██████╗  ██████╗██╗  ██╗███████╗                                    ║
+# ║   ██║     ██╔═══██╗██╔════╝██║ ██╔╝██╔════╝                                    ║
+# ║   ██║     ██║   ██║██║     █████╔╝ ███████╗                                    ║
+# ║   ██║     ██║   ██║██║     ██╔═██╗ ╚════██║                                    ║
+# ║   ███████╗╚██████╔╝╚██████╗██║  ██╗███████║                                    ║
+# ║   ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝                                    ║
+# ║                                                                                ║
+# ║   Version: 1.0.0                                                               ║
+# ║   Author: MrSingu                                                              ║
+# ║   GitHub: https://github.com/LeCarpincho                                       ║
+# ║   API: Paper 1.21.4+                                                           ║
+# ║                                                                                ║
+# ║   A premium lock & security system for your Minecraft server                   ║
+# ║   Protect chests, doors, and more with tiered locks and lockpicks!             ║
+# ║                                                                                ║
+# ╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                           GENERAL SETTINGS                                    │
+# │                                                                               │
+# │  Core plugin configuration options                                            │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+general:
+
+  # ─── Language ───────────────────────────────────────────────────────────────
+  # Available: en_EN (English), es_ES (Spanish)
+  # You can add custom languages in the /lang folder
+  language: "en_EN"
+
+  # ─── Debug Mode ─────────────────────────────────────────────────────────────
+  # Enable detailed logging for troubleshooting
+  # WARNING: This will spam your console! Only enable when needed
+  debug: false
+
+  # ─── Auto-Save ──────────────────────────────────────────────────────────────
+  # Interval in minutes to auto-save lock data (0 = disabled)
+  # Recommended: 5-10 minutes for busy servers
+  auto-save-interval: 5
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                              LOCK TIERS                                       │
+# │                                                                               │
+# │  Configure the different lock tiers and their properties                      │
+# │                                                                               │
+# │  ► BRONZE - Entry level, easy to pick                                         │
+# │  ► SILVER - Mid-tier, moderate security                                       │
+# │  ► GOLD   - Premium tier, very hard to pick                                   │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+tiers:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  #                              BRONZE TIER
+  # ═══════════════════════════════════════════════════════════════════════════
+  bronze:
+    # Enable/disable this tier
+    enabled: true
+
+    # Display name (MiniMessage format supported)
+    # Colors: <red>, <green>, <blue>, <gold>, <gray>, etc.
+    # Formats: <bold>, <italic>, <underlined>, <strikethrough>
+    display-name: "<#CD7F32><bold>Bronze</bold> Lock</#CD7F32>"
+
+    # Item material for the lock
+    # Full list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+    material: "COPPER_INGOT"
+
+    # Custom model data for resource packs (0 = disabled)
+    custom-model-data: 1001
+
+    # Lockpick difficulty (1-100)
+    # Higher = harder to pick
+    # ► 1-30:   Easy      (Basic lockpicks work well)
+    # ► 31-60:  Medium    (Advanced lockpicks recommended)
+    # ► 61-100: Hard      (Master lockpicks needed)
+    pick-difficulty: 25
+
+    # Can this lock be picked with lockpicks?
+    pickable: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  #                              SILVER TIER
+  # ═══════════════════════════════════════════════════════════════════════════
+  silver:
+    enabled: true
+    display-name: "<gray><bold>Silver</bold> Lock</gray>"
+    material: "IRON_INGOT"
+    custom-model-data: 1002
+    pick-difficulty: 50
+    pickable: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  #                               GOLD TIER
+  # ═══════════════════════════════════════════════════════════════════════════
+  gold:
+    enabled: true
+    display-name: "<gold><bold>Gold</bold> Lock</gold>"
+    material: "GOLD_INGOT"
+    custom-model-data: 1003
+    pick-difficulty: 85
+    pickable: true
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                            KEY CONFIGURATION                                  │
+# │                                                                               │
+# │  Keys allow trusted access without needing lockpicks                          │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+keys:
+
+  # ─── Key Materials ──────────────────────────────────────────────────────────
+  # Base material for regular keys
+  base-material: "TRIAL_KEY"
+
+  # Material for master keys (if implemented)
+  master-material: "OMINOUS_TRIAL_KEY"
+
+  # ─── Key Limits ─────────────────────────────────────────────────────────────
+  # Allow players to create duplicate keys
+  allow-duplicates: true
+
+  # Maximum keys that can exist for a single lock
+  max-keys-per-lock: 5
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          LOCKPICK CONFIGURATION                               │
+# │                                                                               │
+# │  Lockpicks allow breaking into locks (with skill required!)                   │
+# │                                                                               │
+# │  Tier Compatibility:                                                          │
+# │  ► BASIC    → Can only pick BRONZE locks                                      │
+# │  ► ADVANCED → Can pick BRONZE and SILVER locks                                │
+# │  ► MASTER   → Can pick ALL locks                                              │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+lockpicks:
+
+  # Master switch - disable all lockpicks on the server
+  enabled: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  #                            BASIC LOCKPICK
+  #                      Entry-level, for beginners
+  # ═══════════════════════════════════════════════════════════════════════════
+  basic:
+    enabled: true
+    display-name: "<gray>Basic Lockpick</gray>"
+    material: "STICK"
+    custom-model-data: 2001
+
+    # Success modifier added to base chance
+    # Formula: base_chance + success_modifier
+    success-modifier: 0
+
+    # Number of uses before breaking
+    durability: 5
+
+    # Cooldown between attempts (seconds)
+    cooldown: 3.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  #                           ADVANCED LOCKPICK
+  #                     Better success rate & durability
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    enabled: true
+    display-name: "<aqua>Advanced Lockpick</aqua>"
+    material: "BLAZE_ROD"
+    custom-model-data: 2002
+    success-modifier: 15
+    durability: 15
+    cooldown: 2.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  #                            MASTER LOCKPICK
+  #                   Premium tier, highest success rate
+  # ═══════════════════════════════════════════════════════════════════════════
+  master:
+    enabled: true
+    display-name: "<light_purple>Master Lockpick</light_purple>"
+    material: "BREEZE_ROD"
+    custom-model-data: 2003
+    success-modifier: 35
+    durability: 30
+    cooldown: 1.0
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          PROTECTION SETTINGS                                  │
+# │                                                                               │
+# │  IMPORTANT: All protections are now ALWAYS ACTIVE for locked blocks!          │
+# │  These settings are kept for reference but locked blocks are always           │
+# │  protected from destruction. Only owners and bypass users can break them.     │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+protection:
+
+  # ─── Explosion Protection ───────────────────────────────────────────────────
+  # Protects against: TNT, Creepers, Beds (nether), Respawn Anchors, etc.
+  prevent-explosions: true
+
+  # ─── Piston Protection ──────────────────────────────────────────────────────
+  # Prevents pistons from pushing/pulling locked blocks
+  prevent-pistons: true
+
+  # ─── Hopper Protection ──────────────────────────────────────────────────────
+  # Prevents hoppers from extracting items from locked containers
+  prevent-hoppers: true
+
+  # ─── Fire Protection ────────────────────────────────────────────────────────
+  # Prevents locked blocks from burning
+  prevent-fire: true
+
+  # ─── Enderman Protection ────────────────────────────────────────────────────
+  # Prevents Endermen from picking up locked blocks
+  prevent-enderman: true
+
+  # ─── Wither Protection ──────────────────────────────────────────────────────
+  # Prevents Wither from destroying locked blocks
+  prevent-wither: true
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                            LOCKABLE BLOCKS                                    │
+# │                                                                               │
+# │  Define which blocks can have locks placed on them                            │
+# │  Add or remove materials as needed for your server                            │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+lockable-blocks:
+
+  # ─── Containers ─────────────────────────────────────────────────────────────
+  containers:
+    - CHEST
+    - TRAPPED_CHEST
+    - BARREL
+
+  # ─── Shulker Boxes ──────────────────────────────────────────────────────────
+  shulkers:
+    - SHULKER_BOX
+    - WHITE_SHULKER_BOX
+    - ORANGE_SHULKER_BOX
+    - MAGENTA_SHULKER_BOX
+    - LIGHT_BLUE_SHULKER_BOX
+    - YELLOW_SHULKER_BOX
+    - LIME_SHULKER_BOX
+    - PINK_SHULKER_BOX
+    - GRAY_SHULKER_BOX
+    - LIGHT_GRAY_SHULKER_BOX
+    - CYAN_SHULKER_BOX
+    - PURPLE_SHULKER_BOX
+    - BLUE_SHULKER_BOX
+    - BROWN_SHULKER_BOX
+    - GREEN_SHULKER_BOX
+    - RED_SHULKER_BOX
+    - BLACK_SHULKER_BOX
+
+  # ─── Doors ──────────────────────────────────────────────────────────────────
+  doors:
+    # Wooden Doors
+    - OAK_DOOR
+    - SPRUCE_DOOR
+    - BIRCH_DOOR
+    - JUNGLE_DOOR
+    - ACACIA_DOOR
+    - DARK_OAK_DOOR
+    - MANGROVE_DOOR
+    - CHERRY_DOOR
+    - BAMBOO_DOOR
+    - CRIMSON_DOOR
+    - WARPED_DOOR
+    # Metal Doors
+    - IRON_DOOR
+    - COPPER_DOOR
+    - EXPOSED_COPPER_DOOR
+    - WEATHERED_COPPER_DOOR
+    - OXIDIZED_COPPER_DOOR
+    - WAXED_COPPER_DOOR
+    - WAXED_EXPOSED_COPPER_DOOR
+    - WAXED_WEATHERED_COPPER_DOOR
+    - WAXED_OXIDIZED_COPPER_DOOR
+
+  # ─── Trapdoors ──────────────────────────────────────────────────────────────
+  trapdoors:
+    # Wooden Trapdoors
+    - OAK_TRAPDOOR
+    - SPRUCE_TRAPDOOR
+    - BIRCH_TRAPDOOR
+    - JUNGLE_TRAPDOOR
+    - ACACIA_TRAPDOOR
+    - DARK_OAK_TRAPDOOR
+    - MANGROVE_TRAPDOOR
+    - CHERRY_TRAPDOOR
+    - BAMBOO_TRAPDOOR
+    - CRIMSON_TRAPDOOR
+    - WARPED_TRAPDOOR
+    # Metal Trapdoors
+    - IRON_TRAPDOOR
+    - COPPER_TRAPDOOR
+    - EXPOSED_COPPER_TRAPDOOR
+    - WEATHERED_COPPER_TRAPDOOR
+    - OXIDIZED_COPPER_TRAPDOOR
+    - WAXED_COPPER_TRAPDOOR
+    - WAXED_EXPOSED_COPPER_TRAPDOOR
+    - WAXED_WEATHERED_COPPER_TRAPDOOR
+    - WAXED_OXIDIZED_COPPER_TRAPDOOR
+
+  # ─── Fence Gates ────────────────────────────────────────────────────────────
+  fence-gates:
+    - OAK_FENCE_GATE
+    - SPRUCE_FENCE_GATE
+    - BIRCH_FENCE_GATE
+    - JUNGLE_FENCE_GATE
+    - ACACIA_FENCE_GATE
+    - DARK_OAK_FENCE_GATE
+    - MANGROVE_FENCE_GATE
+    - CHERRY_FENCE_GATE
+    - BAMBOO_FENCE_GATE
+    - CRIMSON_FENCE_GATE
+    - WARPED_FENCE_GATE
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                              COOLDOWNS                                        │
+# │                                                                               │
+# │  Time restrictions between actions (in seconds)                               │
+# │  Set to 0 to disable a specific cooldown                                      │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+cooldowns:
+
+  # Time between placing locks
+  lock-placement: 1.0
+
+  # Time between using keys
+  key-use: 0.5
+
+  # Time between lockpick attempts (overridden by lockpick tier settings)
+  lockpick-attempt: 3.0
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                            SOUND EFFECTS                                      │
+# │                                                                               │
+# │  Customize the sounds played during various actions                           │
+# │  Full list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html    │
+# │  Set to "NONE" to disable a specific sound                                    │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+sounds:
+
+  # ─── Lock Sounds ────────────────────────────────────────────────────────────
+  lock-place: "BLOCK_IRON_DOOR_CLOSE"
+  lock-remove: "BLOCK_IRON_DOOR_OPEN"
+  lock-success: "BLOCK_CHEST_OPEN"
+  lock-denied: "BLOCK_IRON_DOOR_CLOSE"
+
+  # ─── Key Sounds ─────────────────────────────────────────────────────────────
+  key-use: "BLOCK_IRON_TRAPDOOR_OPEN"
+
+  # ─── Lockpick Sounds ────────────────────────────────────────────────────────
+  lockpick-success: "ENTITY_PLAYER_LEVELUP"
+  lockpick-fail: "ENTITY_ITEM_BREAK"
+  lockpick-break: "ENTITY_ITEM_BREAK"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                           PARTICLE EFFECTS                                    │
+# │                                                                               │
+# │  Visual feedback for player actions                                           │
+# │  Full list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Particle.html │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+particles:
+
+  # Enable/disable all particle effects
+  enabled: true
+
+  # ─── Lock Particles ─────────────────────────────────────────────────────────
+  lock-place: "HAPPY_VILLAGER"
+  lock-denied: "ANGRY_VILLAGER"
+
+  # ─── Lockpick Particles ─────────────────────────────────────────────────────
+  lockpick-success: "FIREWORK"
+  lockpick-fail: "SMOKE"
+
+
+# ╔════════════════════════════════════════════════════════════════════════════════╗
+# ║                              END OF CONFIG                                     ║
+# ║                                                                                ║
+# ║   Author: MrSingu                                                              ║
+# ║   GitHub: https://github.com/LeCarpincho/PinchosLocks                          ║
+# ║                                                                                ║
+# ║   Found a bug? Report it:                                                      ║
+# ║   ► https://github.com/LeCarpincho/PinchosLocks/issues                         ║
+# ║                                                                                ║
+# ╚════════════════════════════════════════════════════════════════════════════════╝

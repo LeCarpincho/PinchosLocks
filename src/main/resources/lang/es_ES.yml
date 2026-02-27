@@ -1,0 +1,230 @@
+# ╔════════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                                ║
+# ║   ██████╗ ██╗███╗   ██╗ ██████╗██╗  ██╗ ██████╗ ███████╗                       ║
+# ║   ██╔══██╗██║████╗  ██║██╔════╝██║  ██║██╔═══██╗██╔════╝                       ║
+# ║   ██████╔╝██║██╔██╗ ██║██║     ███████║██║   ██║███████╗                       ║
+# ║   ██╔═══╝ ██║██║╚██╗██║██║     ██╔══██║██║   ██║╚════██║                       ║
+# ║   ██║     ██║██║ ╚████║╚██████╗██║  ██║╚██████╔╝███████║                       ║
+# ║   ╚═╝     ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝                       ║
+# ║                                                                                ║
+# ║                      ARCHIVO DE IDIOMA - ESPAÑOL                               ║
+# ║                          Author: MrSingu                                       ║
+# ║                  GitHub: github.com/LeCarpincho                                ║
+# ║                                                                                ║
+# ╚════════════════════════════════════════════════════════════════════════════════╝
+#
+# Formato: MiniMessage (https://docs.advntr.dev/minimessage/format.html)
+#
+# Colores disponibles:
+#   <red>, <green>, <blue>, <yellow>, <gold>, <gray>, <white>, <black>
+#   <dark_red>, <dark_green>, <dark_blue>, <dark_aqua>, <dark_purple>
+#   <aqua>, <light_purple>
+#
+# Formatos:
+#   <bold>, <italic>, <underlined>, <strikethrough>, <obfuscated>
+#
+# Colores HEX:
+#   <#FF5555>texto</#FF5555>
+#
+# Gradientes:
+#   <gradient:red:blue>texto</gradient>
+#
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                               PREFIJO                                         │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+prefix: "<dark_gray>[<gradient:#FFD700:#FFA500>PinchosLocks</gradient>]</dark_gray> "
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          MENSAJES GENERALES                                   │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+general:
+  reload: "<green>Configuracion recargada correctamente.</green>"
+  no-permission: "<red>No tienes permiso para hacer esto.</red>"
+  player-only: "<red>Este comando solo puede ser usado por jugadores.</red>"
+  player-not-found: "<red>Jugador no encontrado: <white>{player}</white></red>"
+  invalid-tier: "<red>Tier invalido. Usa: <white>bronze, silver, gold</white></red>"
+  invalid-amount: "<red>Cantidad invalida. Debe ser un numero positivo.</red>"
+  cooldown: "<yellow>Debes esperar <white>{time}</white> segundos.</yellow>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          MENSAJES DE CANDADOS                                 │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+lock:
+  # ─── Acciones ───────────────────────────────────────────────────────────────
+  placed: "<green>Has colocado un candado <white>{tier}</white> en este bloque.</green>"
+  removed: "<green>Has quitado el candado de este bloque.</green>"
+
+  # ─── Errores ────────────────────────────────────────────────────────────────
+  already-locked: "<red>Este bloque ya tiene un candado.</red>"
+  not-locked: "<red>Este bloque no tiene ningun candado.</red>"
+  not-owner: "<red>No eres el dueno de este candado.</red>"
+  cannot-lock: "<red>No puedes colocar un candado en este tipo de bloque.</red>"
+  cannot-break: "<red>No puedes romper este bloque! Esta protegido con un candado.</red>"
+  not-looking: "<red>Debes mirar un bloque para usar este comando.</red>"
+  tier-locked: "<red>No tienes permiso para usar candados de tier <white>{tier}</white>.</red>"
+
+  # ─── Acceso ─────────────────────────────────────────────────────────────────
+  access-denied: "<red>Este bloque esta protegido con un candado.</red>"
+  access-denied-lockpick: "<red>Este bloque esta protegido con un candado.</red><newline><gray>Necesitas una <yellow>ganzua</yellow> para forzarlo.</gray>"
+  access-granted: "<green>Has abierto el candado con tu llave.</green>"
+  bypass: "<yellow>Has usado tu permiso de bypass para acceder.</yellow>"
+
+  # ─── Informacion del Candado ────────────────────────────────────────────────
+  info:
+    header: "<gray><strikethrough>          </strikethrough> <gold><bold>INFO DEL CANDADO</bold></gold> <strikethrough>          </strikethrough></gray>"
+    owner: "<gray>Dueno: <white>{owner}</white></gray>"
+    tier: "<gray>Tier: <white>{tier}</white></gray>"
+    created: "<gray>Creado: <white>{date}</white></gray>"
+    trusted: "<gray>Confiados: <white>{trusted}</white></gray>"
+    location: "<gray>Ubicacion: <white>{world} ({x}, {y}, {z})</white></gray>"
+    footer: "<gray><strikethrough>                                        </strikethrough></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                           MENSAJES DE LLAVES                                  │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+key:
+  received: "<green>Has recibido una llave para el candado.</green>"
+  given: "<green>Has dado una llave a <white>{player}</white>.</green>"
+  no-key: "<red>No tienes la llave correcta para este candado.</red>"
+  max-keys: "<red>Este candado ya tiene el maximo de llaves permitidas.</red>"
+  duplicate-created: "<green>Has creado una copia de la llave.</green>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                         MENSAJES DE CONFIANZA                                 │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+trust:
+  added: "<green>Has dado acceso a <white>{player}</white> a tu candado.</green>"
+  removed: "<green>Has quitado el acceso de <white>{player}</white> a tu candado.</green>"
+  already-trusted: "<yellow><white>{player}</white> ya tiene acceso a este candado.</yellow>"
+  not-trusted: "<yellow><white>{player}</white> no tiene acceso a este candado.</yellow>"
+  self: "<red>No puedes confiarte a ti mismo.</red>"
+  list-header: "<gray>Jugadores con acceso:</gray>"
+  list-empty: "<gray>Nadie tiene acceso a este candado.</gray>"
+  list-entry: "<gray>  - <white>{player}</white></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          MENSAJES DE GANZUAS                                  │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+lockpick:
+  # ─── Estado ─────────────────────────────────────────────────────────────────
+  attempting: "<yellow>Intentando forzar el candado...</yellow>"
+  success: "<green>Has forzado el candado! Tienes <white>15 segundos</white> para abrirlo.</green>"
+  failed: "<red>Fallaste al intentar forzar el candado.</red>"
+  broke: "<red>Tu ganzua se ha roto!</red>"
+  cancelled: "<yellow>Forzado cancelado.</yellow>"
+
+  # ─── Errores ────────────────────────────────────────────────────────────────
+  not-pickable: "<red>Este candado no puede ser forzado.</red>"
+  disabled: "<red>Las ganzuas estan deshabilitadas en este servidor.</red>"
+  invalid-tier: "<red>Tier invalido. Usa: <white>basic, advanced, master</white></red>"
+  already-have-access: "<yellow>Ya tienes acceso a este candado.</yellow>"
+  too-weak: "<red>Esta ganzua es muy debil para este candado. Necesitas una ganzua de mayor nivel.</red>"
+
+  # ─── Requisitos ─────────────────────────────────────────────────────────────
+  must-sneak: "<red>Debes estar agachado (Shift) para ganzuar un candado.</red>"
+  stood-up: "<red>Te paraste! El proceso de ganzuado se cancelo.</red>"
+  moved-away: "<red>Te alejaste demasiado del candado!</red>"
+  switched-item: "<red>Cambiaste de item! Forzado cancelado.</red>"
+  too-far: "<red>Te alejaste demasiado del candado!</red>"
+
+  # ─── Notificaciones al Dueno ────────────────────────────────────────────────
+  owner-broke-notification: "<yellow><bold>!</bold></yellow> <gray>Alguien ha roto una ganzua intentando abrir tu <white>{block}</white>!</gray>"
+  owner-success-notification: "<red><bold>ALERTA!</bold></red> <gray>Alguien ha ganzuado tu <white>{block}</white>!</gray>"
+
+  # ─── Comandos ───────────────────────────────────────────────────────────────
+  give-success: "<green>Has dado <white>{amount}x Ganzua {tier}</white> a <white>{player}</white>.</green>"
+
+  # ─── Ayuda de Comandos ──────────────────────────────────────────────────────
+  help:
+    header: "<gray><strikethrough>          </strikethrough> <gold><bold>AYUDA GANZUAS</bold></gold> <strikethrough>          </strikethrough></gray>"
+    lockpick: "<gold>/lockpick</gold> <gray>- Muestra esta ayuda</gray>"
+    give: "<gold>/lockpick give <player> <tier> [cantidad]</gold> <gray>- Da ganzuas</gray>"
+    footer: "<gray><strikethrough>                                        </strikethrough></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                           MENSAJES DE ADMIN                                   │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+admin:
+  give-success: "<green>Has dado <white>{amount}x {item}</white> a <white>{player}</white>.</green>"
+  give-fail: "<red>No se pudo dar el item a <white>{player}</white>. Inventario lleno?</red>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                          AYUDA DE COMANDOS                                    │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+help:
+  header: "<gray><strikethrough>          </strikethrough> <gradient:#FFD700:#FFA500><bold>PINCHOS LOCKS</bold></gradient> <strikethrough>          </strikethrough></gray>"
+  lock: "<gold>/lock</gold> <gray>- Coloca un candado en el bloque que miras</gray>"
+  give: "<gold>/lock give <player> <tier> [cantidad]</gold> <gray>- Da candados</gray>"
+  info: "<gold>/lock info</gold> <gray>- Muestra info del candado que miras</gray>"
+  remove: "<gold>/lock remove</gold> <gray>- Quita el candado del bloque que miras</gray>"
+  trust: "<gold>/lock trust <player></gold> <gray>- Da acceso a un jugador</gray>"
+  untrust: "<gold>/lock untrust <player></gold> <gray>- Quita acceso a un jugador</gray>"
+  trustlist: "<gold>/lock trustlist</gold> <gray>- Lista jugadores con acceso</gray>"
+  key: "<gold>/lock key</gold> <gray>- Obtiene una llave para tu candado</gray>"
+  reload: "<gold>/lock reload</gold> <gray>- Recarga la configuracion</gray>"
+  footer: "<gray><strikethrough>                                        </strikethrough></gray>"
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                         NOMBRES Y LORE DE ITEMS                               │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+items:
+
+  # ─── Candados ───────────────────────────────────────────────────────────────
+  lock:
+    name: "<gold>{tier} Lock</gold>"
+    lore:
+      - ""
+      - "<gray>Coloca este candado en un bloque</gray>"
+      - "<gray>para protegerlo de otros jugadores.</gray>"
+      - ""
+      - "<yellow>Click derecho para colocar</yellow>"
+
+  # ─── Llaves ─────────────────────────────────────────────────────────────────
+  key:
+    name: "<aqua>Llave de Candado</aqua>"
+    lore:
+      - ""
+      - "<gray>Esta llave abre un candado especifico.</gray>"
+      - ""
+      - "<dark_gray>ID: <white>{id}</white></dark_gray>"
+      - "<dark_gray>Dueno: <white>{owner}</white></dark_gray>"
+      - ""
+      - "<yellow>Click derecho para usar</yellow>"
+
+  # ─── Ganzuas ────────────────────────────────────────────────────────────────
+  lockpick:
+    name: "<gray>{tier} Lockpick</gray>"
+    lore:
+      - ""
+      - "<gray>Usa esta ganzua para intentar</gray>"
+      - "<gray>forzar candados ajenos.</gray>"
+      - ""
+      - "<dark_gray>Durabilidad: <white>{durability}</white></dark_gray>"
+      - "<dark_gray>Bonus: <green>+{bonus}%</green></dark_gray>"
+      - ""
+      - "<yellow>Click derecho en un candado</yellow>"
+      - "<yellow>mientras estas agachado</yellow>"
+
+
+# ╔════════════════════════════════════════════════════════════════════════════════╗
+# ║                           FIN DEL ARCHIVO                                      ║
+# ╚════════════════════════════════════════════════════════════════════════════════╝
